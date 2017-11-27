@@ -154,7 +154,7 @@ def runHotcellAnalysis(spark: SparkSession, pointPath: String): DataFrame =
   }
 */
   //final_df.select(exprs: _*).printSchema
-
+  final_df3.show()
   return final_df3 // YOU NEED TO CHANGE THIS PART
 }
 }

@@ -4,7 +4,7 @@
 [0m[[0m[0minfo[0m] [0m[0mMerging files...[0m
 [0m[[0m[33mwarn[0m] [0m[0mMerging 'META-INF/MANIFEST.MF' with strategy 'discard'[0m
 [0m[[0m[33mwarn[0m] [0m[0mStrategy 'discard' was applied to a file[0m
-[0m[[0m[0minfo[0m] [0m[0mSHA-1: f6d32fa4a80f44f4e0e031d459ab5378c85073f7[0m
+[0m[[0m[0minfo[0m] [0m[0mSHA-1: 95e9412feccd64a758f6329673a3b0fdd252e656[0m
 [0m[[0m[0minfo[0m] [0m[0mPackaging /Users/hduser/Hotspot_template/target/scala-2.11/CSE512-Hotspot-Analysis-Template-assembly-0.1.0.jar ...[0m
 [0m[[0m[0mdebug[0m] [0m[0mInput file mappings:[0m
 [0m[[0m[0mdebug[0m] [0m[0m	cse512/Entrance$.class[0m
@@ -13,14 +13,6 @@
 [0m[[0m[0mdebug[0m] [0m[0m	  /Users/hduser/Hotspot_template/target/streams/$global/assemblyOption/$global/streams/assembly/bc7fa87697053166cf1fbe8ff422cec466faba98_dir/cse512/Entrance$delayedInit$body.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	cse512/Entrance.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	  /Users/hduser/Hotspot_template/target/streams/$global/assemblyOption/$global/streams/assembly/bc7fa87697053166cf1fbe8ff422cec466faba98_dir/cse512/Entrance.class[0m
-[0m[[0m[0mdebug[0m] [0m[0m	cse512/HotcellAnalysis$$anonfun$1$$anonfun$apply$1$$anonfun$apply$mcVI$sp$1$$anonfun$apply$mcVI$sp$2.class[0m
-[0m[[0m[0mdebug[0m] [0m[0m	  /Users/hduser/Hotspot_template/target/streams/$global/assemblyOption/$global/streams/assembly/bc7fa87697053166cf1fbe8ff422cec466faba98_dir/cse512/HotcellAnalysis$$anonfun$1$$anonfun$apply$1$$anonfun$apply$mcVI$sp$1$$anonfun$apply$mcVI$sp$2.class[0m
-[0m[[0m[0mdebug[0m] [0m[0m	cse512/HotcellAnalysis$$anonfun$1$$anonfun$apply$1$$anonfun$apply$mcVI$sp$1.class[0m
-[0m[[0m[0mdebug[0m] [0m[0m	  /Users/hduser/Hotspot_template/target/streams/$global/assemblyOption/$global/streams/assembly/bc7fa87697053166cf1fbe8ff422cec466faba98_dir/cse512/HotcellAnalysis$$anonfun$1$$anonfun$apply$1$$anonfun$apply$mcVI$sp$1.class[0m
-[0m[[0m[0mdebug[0m] [0m[0m	cse512/HotcellAnalysis$$anonfun$1$$anonfun$apply$1.class[0m
-[0m[[0m[0mdebug[0m] [0m[0m	  /Users/hduser/Hotspot_template/target/streams/$global/assemblyOption/$global/streams/assembly/bc7fa87697053166cf1fbe8ff422cec466faba98_dir/cse512/HotcellAnalysis$$anonfun$1$$anonfun$apply$1.class[0m
-[0m[[0m[0mdebug[0m] [0m[0m	cse512/HotcellAnalysis$$anonfun$1.class[0m
-[0m[[0m[0mdebug[0m] [0m[0m	  /Users/hduser/Hotspot_template/target/streams/$global/assemblyOption/$global/streams/assembly/bc7fa87697053166cf1fbe8ff422cec466faba98_dir/cse512/HotcellAnalysis$$anonfun$1.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	cse512/HotcellAnalysis$$anonfun$runHotcellAnalysis$1.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	  /Users/hduser/Hotspot_template/target/streams/$global/assemblyOption/$global/streams/assembly/bc7fa87697053166cf1fbe8ff422cec466faba98_dir/cse512/HotcellAnalysis$$anonfun$runHotcellAnalysis$1.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	cse512/HotcellAnalysis$$anonfun$runHotcellAnalysis$2.class[0m
@@ -35,8 +27,6 @@
 [0m[[0m[0mdebug[0m] [0m[0m	  /Users/hduser/Hotspot_template/target/streams/$global/assemblyOption/$global/streams/assembly/bc7fa87697053166cf1fbe8ff422cec466faba98_dir/cse512/HotcellAnalysis$$typecreator2$1.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	cse512/HotcellAnalysis$$typecreator3$1.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	  /Users/hduser/Hotspot_template/target/streams/$global/assemblyOption/$global/streams/assembly/bc7fa87697053166cf1fbe8ff422cec466faba98_dir/cse512/HotcellAnalysis$$typecreator3$1.class[0m
-[0m[[0m[0mdebug[0m] [0m[0m	cse512/HotcellAnalysis$$typecreator5$1.class[0m
-[0m[[0m[0mdebug[0m] [0m[0m	  /Users/hduser/Hotspot_template/target/streams/$global/assemblyOption/$global/streams/assembly/bc7fa87697053166cf1fbe8ff422cec466faba98_dir/cse512/HotcellAnalysis$$typecreator5$1.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	cse512/HotcellAnalysis$.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	  /Users/hduser/Hotspot_template/target/streams/$global/assemblyOption/$global/streams/assembly/bc7fa87697053166cf1fbe8ff422cec466faba98_dir/cse512/HotcellAnalysis$.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	cse512/HotcellAnalysis.class[0m

@@ -57,8 +57,8 @@ def runHotcellAnalysis(spark: SparkSession, pointPath: String): DataFrame =
   println(pickupInfo.count())
   // kabbom filter
   pickupInfo = pickupInfo.filter(pickupInfo("x") >= minX and pickupInfo("x") <= maxX and pickupInfo("y") >= minY and pickupInfo("y") <= maxY and pickupInfo("z") >= minZ and pickupInfo("z") <= maxZ)
+    .orderBy("x", "y", "z")
   println(pickupInfo.count())
-
   //groupby
   pickupInfo = pickupInfo.groupBy("x", "y", "z").count()
   mean = pickupInfo.agg(avg(pickupInfo("count"))).first().get(0).asInstanceOf[Double].doubleValue()
@@ -69,7 +69,7 @@ def runHotcellAnalysis(spark: SparkSession, pointPath: String): DataFrame =
   var joinedResult = spark.sql("select t1.x as t1x,t1.y as t1y,t1.z as t1z,t2.x as t2x,t2.y as t2y,t2.z as t2z,t2.count as t2count from pickupinfo as t1 cross join pickupinfo as t2 " +
     "where (t1.x==t2.x or t1.x==t2.x-1 or t1.x==t2.x+1) and (t1.y==t2.y or t1.y==t2.y-1 or t1.y==t2.y+1) and (t1.z==t2.z or t1.z==t2.z-1 or t1.z==t2.z+1)")
 
-  joinedResult = joinedResult.groupBy(joinedResult("t1x"), joinedResult("t1y"), joinedResult("t1z")).agg(count("t2count"),sum(joinedResult("t2count"))).orderBy("t1x", "t1y", "t1z")
+  joinedResult = joinedResult.groupBy(joinedResult("t1x"), joinedResult("t1y"), joinedResult("t1z")).agg(count("t2count"),sum(joinedResult("t2count")))
   joinedResult = joinedResult.withColumnRenamed("count(t2count)", "neighbours")
   joinedResult = joinedResult.withColumnRenamed("sum(t2count)", "weight")
   joinedResult.show()
@@ -126,45 +126,6 @@ def runHotcellAnalysis(spark: SparkSession, pointPath: String): DataFrame =
 
     */
 
-/*
-  //zscore
-  val list_string_output = mutable.MutableList[(Int, Int, Int, Double)]()
-  for(_row <- list.toArray()){
-    val row = _row.asInstanceOf[Row]
-    val x= row.get(0).asInstanceOf[Integer].intValue()
-    val y = row.get(1).asInstanceOf[Integer].intValue()
-    val z= row.get(2).asInstanceOf[Integer].intValue()
-    var sum = 0
-    var neighbours= 0
-    for (ix <- Seq(-1, 0 ,1)){
-      for (iy <- Seq(-1, 0 ,1)) {
-        for (iz <- Seq(-1, 0 ,1)) {
-          val nx=ix+x
-          val ny=iy+y
-          val nz =iz+z
-          val key = ""+nx+","+ny+","+nz
-          var filtered = mapped.get(key)
-          if(filtered.orNull!=null){
-            val count = filtered.orNull.intValue()
-            sum += count
-            neighbours+=1
-          }
-        }
-      }
-    }
-
-    val z_score = (sum - (mean * neighbours))/ (sd * Math.sqrt((numCells* neighbours - neighbours*neighbours)/ (numCells-1)))
-    if(x==null || y==null || z==null){
-      println("Nullllllllllll")
-    }
-    val str= (x, y, z, z_score)//""+x+","+y+","+z+","+z_score
-    list_string_output+=str
-  }
-  import spark.sqlContext.implicits._
-  var final_df = list_string_output.toDF(Seq("x", "y", "z", "_4"):_*).orderBy("_4")
-
-  final_df = final_df.drop("_4")
-*/
   /*val rows = list_string_output.map{x => Row(x:_*)}
   val rdd = spark.sparkContext.makeRDD[RDD](rows)
   val df = spark.sqlContext.createDataFrame(rdd, schema)

@@ -28,10 +28,10 @@ object HotcellAnalysis {
   val maxY = 40.90/HotcellUtils.coordinateStep
   val minZ = 1
   val maxZ = 31
-  val NEIGHBORS_ON_CORNERS = 7//8
-  val NEIGHBORS_ON_EDGE = 11//12
-  val NEIGHBORS_ON_FACE = 17//18
-  val NEIGHBORS_ON_INSIDE = 26//27
+  val NEIGHBORS_ON_CORNERS = 7
+  val NEIGHBORS_ON_EDGE = 11
+  val NEIGHBORS_ON_FACE = 17
+  val NEIGHBORS_ON_INSIDE = 26
 def runHotcellAnalysis(spark: SparkSession, pointPath: String): DataFrame =
 {
   // Load the original data from a data source
@@ -72,7 +72,8 @@ def runHotcellAnalysis(spark: SparkSession, pointPath: String): DataFrame =
   pickupInfo.createOrReplaceTempView("pickupinfo")
 
   var joinedResult = spark.sql("select t1.x as t1x,t1.y as t1y,t1.z as t1z,t2.x as t2x,t2.y as t2y,t2.z as t2z,t2.count as t2count from pickupinfo as t1 cross join pickupinfo as t2 " +
-    "where (t1.x==t2.x or t1.x==t2.x-1 or t1.x==t2.x+1) and (t1.y==t2.y or t1.y==t2.y-1 or t1.y==t2.y+1) and (t1.z==t2.z or t1.z==t2.z-1 or t1.z==t2.z+1)")
+    "where (t1.x==t2.x or t1.x==t2.x-1 or t1.x==t2.x+1) and (t1.y==t2.y or t1.y==t2.y-1 or t1.y==t2.y+1) and (t1.z==t2.z or t1.z==t2.z-1 or t1.z==t2.z+1)"
+    )
 
   joinedResult = joinedResult.groupBy(joinedResult("t1x"), joinedResult("t1y"), joinedResult("t1z")).agg(sum(joinedResult("t2count")))
   joinedResult = joinedResult.withColumnRenamed("sum(t2count)", "weight")
@@ -82,7 +83,7 @@ def runHotcellAnalysis(spark: SparkSession, pointPath: String): DataFrame =
   joinedResult = spark.sql("select t1x,t1y,t1z,weight,countNeighbours(t1x,t1y,t1z) as neighbours from withoutNeighbours")
   joinedResult.createOrReplaceTempView("joinedResult")
   spark.udf.register("zscore",(neighbours:Int, weight:Int)=>(zscore(neighbours, weight)))
-  var final_res = spark.sql("select t1x as x, t1y as y, t1z as z, zscore(neighbours, weight) as z_score from joinedResult").orderBy(desc("z_score")).limit(50)
+  var final_res = spark.sql("select t1x as x, t1y as y, t1z as z, zscore(neighbours, weight) as z_score from joinedResult").orderBy(desc("z_score"))
   final_res.show(50)
   final_res = final_res.drop("z_score")
   /*

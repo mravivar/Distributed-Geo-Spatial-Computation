@@ -27,14 +27,15 @@ object HotcellAnalysis {
   val maxY = 40.90/HotcellUtils.coordinateStep
   val minZ = 1
   val maxZ = 31
-  val NEIGHBORS_ON_CORNERS = 7
-  val NEIGHBORS_ON_EDGE = 11
-  val NEIGHBORS_ON_FACE = 17
-  val NEIGHBORS_ON_INSIDE = 26
+  val NEIGHBORS_ON_CORNERS = 8
+  val NEIGHBORS_ON_EDGE = 12
+  val NEIGHBORS_ON_FACE = 18
+  val NEIGHBORS_ON_INSIDE = 27
   var numPoints:Long =0
+  var numCells=0.0
 def runHotcellAnalysis(spark: SparkSession, pointPath: String): DataFrame =
 {
-  var numCells=0.0
+
   // Load the original data from a data source
   var pickupInfo = spark.read.format("com.databricks.spark.csv").option("delimiter",";").option("header","false").load(pointPath);
   pickupInfo = pickupInfo.filter(pickupInfo("_c0") =!= "vendor_name")
@@ -68,25 +69,29 @@ def runHotcellAnalysis(spark: SparkSession, pointPath: String): DataFrame =
   //groupby
   pickupInfo=pickupInfo.groupBy("x", "y", "z").count().persist()
   pickupInfo.createOrReplaceTempView("pickupinfo")
+  pickupInfo.orderBy(desc("count")).show()
+  val sum_vals=spark.sql("select sum(count), sum(count * count) from pickupinfo").first()
 
-  numPoints = pickupInfo.agg(sum(pickupInfo("count"))).first().get(0).asInstanceOf[Long]
-  val justCountOfNumberOfCells = pickupInfo.count()//this to negate the wrong N
+  numPoints = sum_vals.getLong(0)//pickupInfo.agg(sum(pickupInfo("count"))).first().get(0).asInstanceOf[Long]
+  //val justCountOfNumberOfCells = pickupInfo.count()//this to negate the wrong N
   mean = numPoints/numCells
   println ("mean"+ mean)
-
+  sd=math.sqrt((sum_vals.getLong(1)/numCells) - (mean*mean))
   //val sumsq = spark.sql("select sum(var) from (select square(pickupinfo.count - "+mean+" over ()) as var from pickupinfo ) pickupinfo").first().get(0).asInstanceOf[Double].doubleValue()
   //sd =  math.sqrt(sumsq/numCells)
-  val sd_old = pickupInfo.agg(stddev(pickupInfo("count"))).first().get(0).asInstanceOf[Double].doubleValue()
-  sd = (sd_old*math.sqrt(justCountOfNumberOfCells))/math.sqrt(numCells)
+  //val sd_old = pickupInfo.agg(stddev(pickupInfo("count"))).first().get(0).asInstanceOf[Double].doubleValue()
+  //sd = (sd_old*math.sqrt(justCountOfNumberOfCells))/math.sqrt(numCells)
   println ("SD::"+sd)
 
 
-  var joinedResult = spark.sql("select t1.x as t1x,t1.y as t1y,t1.z as t1z,t2.x as t2x,t2.y as t2y,t2.z as t2z,t2.count as t2count from pickupinfo as t1 cross join pickupinfo as t2 " +
+  var joinedResult = spark.sql("select t1.x as t1x,t1.y as t1y,t1.z as t1z,t2.x as t2x,t2.y as t2y,t2.z as t2z,t2.count as t2count from pickupinfo as t1 join pickupinfo as t2 " +
     "where (t1.x==t2.x or t1.x==t2.x-1 or t1.x==t2.x+1) and (t1.y==t2.y or t1.y==t2.y-1 or t1.y==t2.y+1) and (t1.z==t2.z or t1.z==t2.z-1 or t1.z==t2.z+1)"
     )
 
   joinedResult = joinedResult.groupBy(joinedResult("t1x"), joinedResult("t1y"), joinedResult("t1z")).agg(sum(joinedResult("t2count")))
   joinedResult = joinedResult.withColumnRenamed("sum(t2count)", "weight")
+  //joinedResult = joinedResult.withColumnRenamed("count(t2count)", "neighbours")
+  joinedResult.show()
 
   spark.udf.register("countNeighbours", countNeighbours _)
   joinedResult.createOrReplaceTempView("withoutNeighbours")
@@ -97,7 +102,6 @@ def runHotcellAnalysis(spark: SparkSession, pointPath: String): DataFrame =
   final_res.show(50)
   final_res = final_res.drop("z_score")
   /*
-
     val list = pickupInfo.collectAsList()
     var mapped = new mutable.HashMap[String, Integer]()
     for(_row <- list.toArray()) {
@@ -133,7 +137,6 @@ def runHotcellAnalysis(spark: SparkSession, pointPath: String): DataFrame =
           }
         }
       }
-
       val z_score = (sum - (mean * neighbours))/ (sd * Math.sqrt((numCells* neighbours - neighbours*neighbours)/ (numCells-1)))
       if(x==null || y==null || z==null){
         println("Nullllllllllll")
@@ -141,9 +144,7 @@ def runHotcellAnalysis(spark: SparkSession, pointPath: String): DataFrame =
       (x, y, z, z_score)//""+x+","+y+","+z+","+z_score
     }).toDF(Seq("x", "y", "z", "zz"):_*)
       final_df3 = final_df3.orderBy(final_df3("zz").desc).drop("zz")
-
     */
-
   /*val rows = list_string_output.map{x => Row(x:_*)}
   val rdd = spark.sparkContext.makeRDD[RDD](rows)
   val df = spark.sqlContext.createDataFrame(rdd, schema)
@@ -159,7 +160,7 @@ def runHotcellAnalysis(spark: SparkSession, pointPath: String): DataFrame =
 }
   def zscore(neighbours: Int, sum:Int): Double ={
     val nr = sum- (mean* neighbours)
-    val dr = sd * Math.sqrt((numPoints* neighbours - neighbours*neighbours)/ (numPoints-1))
+    val dr = sd * Math.sqrt((numCells* neighbours - neighbours*neighbours)/ (numCells-1))
     return nr/dr
   }
 

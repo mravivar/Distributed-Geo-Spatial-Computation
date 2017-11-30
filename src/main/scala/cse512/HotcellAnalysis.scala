@@ -21,7 +21,6 @@ object HotcellAnalysis {
   Logger.getLogger("com").setLevel(Level.WARN)
   var mean=0.0
   var sd=0.0
-  var numCells=0.0
   val minX = -74.50/HotcellUtils.coordinateStep
   val maxX = -73.70/HotcellUtils.coordinateStep
   val minY = 40.50/HotcellUtils.coordinateStep
@@ -32,8 +31,10 @@ object HotcellAnalysis {
   val NEIGHBORS_ON_EDGE = 11
   val NEIGHBORS_ON_FACE = 17
   val NEIGHBORS_ON_INSIDE = 26
+  var numPoints:Long =0
 def runHotcellAnalysis(spark: SparkSession, pointPath: String): DataFrame =
 {
+  var numCells=0.0
   // Load the original data from a data source
   var pickupInfo = spark.read.format("com.databricks.spark.csv").option("delimiter",";").option("header","false").load(pointPath);
   pickupInfo = pickupInfo.filter(pickupInfo("_c0") =!= "vendor_name")
@@ -66,10 +67,19 @@ def runHotcellAnalysis(spark: SparkSession, pointPath: String): DataFrame =
   println(pickupInfo.count())
   //groupby
   pickupInfo=pickupInfo.groupBy("x", "y", "z").count().persist()
-  mean = pickupInfo.agg(avg(pickupInfo("count"))).first().get(0).asInstanceOf[Double].doubleValue()
-  sd = pickupInfo.agg(stddev(pickupInfo("count"))).first().get(0).asInstanceOf[Double].doubleValue()
-
   pickupInfo.createOrReplaceTempView("pickupinfo")
+
+  numPoints = pickupInfo.agg(sum(pickupInfo("count"))).first().get(0).asInstanceOf[Long]
+  val justCountOfNumberOfCells = pickupInfo.count()//this to negate the wrong N
+  mean = numPoints/numCells
+  println ("mean"+ mean)
+
+  //val sumsq = spark.sql("select sum(var) from (select square(pickupinfo.count - "+mean+" over ()) as var from pickupinfo ) pickupinfo").first().get(0).asInstanceOf[Double].doubleValue()
+  //sd =  math.sqrt(sumsq/numCells)
+  val sd_old = pickupInfo.agg(stddev(pickupInfo("count"))).first().get(0).asInstanceOf[Double].doubleValue()
+  sd = (sd_old*math.sqrt(justCountOfNumberOfCells))/math.sqrt(numCells)
+  println ("SD::"+sd)
+
 
   var joinedResult = spark.sql("select t1.x as t1x,t1.y as t1y,t1.z as t1z,t2.x as t2x,t2.y as t2y,t2.z as t2z,t2.count as t2count from pickupinfo as t1 cross join pickupinfo as t2 " +
     "where (t1.x==t2.x or t1.x==t2.x-1 or t1.x==t2.x+1) and (t1.y==t2.y or t1.y==t2.y-1 or t1.y==t2.y+1) and (t1.z==t2.z or t1.z==t2.z-1 or t1.z==t2.z+1)"
@@ -149,7 +159,7 @@ def runHotcellAnalysis(spark: SparkSession, pointPath: String): DataFrame =
 }
   def zscore(neighbours: Int, sum:Int): Double ={
     val nr = sum- (mean* neighbours)
-    val dr = sd * Math.sqrt((numCells* neighbours - neighbours*neighbours)/ (numCells-1))
+    val dr = sd * Math.sqrt((numPoints* neighbours - neighbours*neighbours)/ (numPoints-1))
     return nr/dr
   }
 
